@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "module": "None",
+    "strict": true,
+    "outDir": "dist"
+  }
+}

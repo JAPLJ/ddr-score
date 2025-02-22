@@ -1,0 +1,7 @@
+**/.terraform/*
+**/.key_pair/*
+
+*.tfstate
+*.tfstate.*
+
+output.json

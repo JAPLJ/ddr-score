@@ -1,0 +1,82 @@
+env_files = ["./.env"]
+
+[env]
+APP_PATH = "--manifest-path=app/Cargo.toml"
+BAT_INSTANCE_ID = { script = ["jq -r .bat_instance_id.value terraform/output.json"] }
+
+#
+# API
+#
+[tasks.build-api-local]
+command = "cargo"
+args = ["build", "--release", "${APP_PATH}"]
+
+[tasks.push-api]
+condition = { env_set = ["AWS_ACCOUNT_ID", "AWS_PROFILE", "REPO_NAME", "API_BINARY"] }
+script = '''
+cd app && cargo sqlx prepare && cd ..
+docker build -t ${REPO_NAME} --build-arg API_BINARY=${API_BINARY} app/
+aws ecr get-login-password --profile ${AWS_PROFILE} --region ap-northeast-1 | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-1.amazonaws.com
+docker tag ${REPO_NAME}:latest ${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-1.amazonaws.com/${REPO_NAME}:latest
+docker push ${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-1.amazonaws.com/${REPO_NAME}:latest
+'''
+
+[tasks.push-api-public]
+env = { REPO_NAME = "ddr-score-data-api", API_BINARY = "public" }
+run_task = "push-api"
+
+[tasks.push-api-private]
+env = { REPO_NAME = "ddr-score-data-api-private", API_BINARY = "private" }
+run_task = "push-api"
+
+[tasks.deploy-api-public]
+script = '''
+FUNC=$(jq -r .api_function_name.value terraform/output.json)
+URI=$(jq -r .api_function_image_uri.value terraform/output.json)
+aws lambda --profile ${AWS_PROFILE} update-function-code --function-name ${FUNC} --image-uri ${URI}
+'''
+
+[tasks.deploy-api-private]
+script = '''
+FUNC=$(jq -r .api_private_function_name.value terraform/output.json)
+URI=$(jq -r .api_private_function_image_uri.value terraform/output.json)
+aws lambda --profile ${AWS_PROFILE} update-function-code --function-name ${FUNC} --image-uri ${URI}
+'''
+
+#
+# Infra
+#
+[tasks.deploy-infra]
+script = '''
+cd terraform
+terraform apply -auto-approve
+terraform output -json > output.json
+'''
+
+[tasks.stop-bat]
+command = "aws"
+args = ["ec2", "--profile", "${AWS_PROFILE}", "stop-instances", "--instance-ids", "${BAT_INSTANCE_ID}"]
+
+[tasks.start-bat]
+command = "aws"
+args = ["ec2", "--profile", "${AWS_PROFILE}", "start-instances", "--instance-ids", "${BAT_INSTANCE_ID}"]
+
+[tasks.ssh-command]
+script = '''
+BAT_IP=`aws ec2 --profile ${AWS_PROFILE} describe-instances --instance-ids ${BAT_INSTANCE_ID} | \
+jq -r '.Reservations[0].Instances[0].PublicIpAddress'`
+echo ssh ec2-user@${BAT_IP} -i terraform/.key_pair/ddr-score-key.id_rsa
+'''
+
+#
+# Front
+#
+[tasks.deploy-front]
+script = '''
+echo export const USER = \"${1}\"\; > front/src/User.tsx
+cd front
+npm run build
+cd ..
+aws s3 sync front/dist/assets/ s3://ddr-score-data-public/scores/${1}/assets/ --delete
+aws s3 cp front/dist/index.html s3://ddr-score-data-public/scores/${1}/
+'''
