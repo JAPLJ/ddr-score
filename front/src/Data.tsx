@@ -174,7 +174,6 @@ export async function fetchTSV(url: string): Promise<string[][]> {
 
   const raw = await response.arrayBuffer();
   const hdr = new Uint8Array(raw.slice(0, 2));
-  console.log(hdr);
   const content = new TextDecoder().decode(
     hdr[0] == 0x1f && hdr[1] == 0x8b ? pako.ungzip(raw) : raw
   );
@@ -184,11 +183,6 @@ export async function fetchTSV(url: string): Promise<string[][]> {
     skipEmptyLines: true,
   });
   if (parsed.errors.length > 0) {
-    console.log(url);
-    console.log(parsed.errors);
-    for (let r = 230; r < 240; ++r) {
-      console.log(content[r]);
-    }
     throw new Error(`Error parsing TSV file`);
   }
 
