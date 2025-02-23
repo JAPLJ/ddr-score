@@ -53,7 +53,7 @@ const Stats = ({ charts }: { charts: Chart[] }) => {
                   clearRankOrder[a as ClearRank]
               )
               .map((rnk) => (
-                <TableRow>
+                <TableRow key={rnk}>
                   <TableCell
                     style={{
                       backgroundColor: clearRankColors[rnk as ClearRank],
@@ -69,7 +69,7 @@ const Stats = ({ charts }: { charts: Chart[] }) => {
       </Box>
 
       <Box>
-        <Table size="small" component={Box}>
+        <Table size="small">
           <TableBody>
             {Object.keys(clearKindOrder)
               .sort(
@@ -84,7 +84,7 @@ const Stats = ({ charts }: { charts: Chart[] }) => {
                     ? { backgroundImage: col[1] }
                     : { backgroundColor: col[1] };
                 return (
-                  <TableRow>
+                  <TableRow key={knd}>
                     <TableCell style={colStyle}>{knd}</TableCell>
                     <TableCell>{kindStats[knd] || 0}</TableCell>
                   </TableRow>
@@ -95,7 +95,7 @@ const Stats = ({ charts }: { charts: Chart[] }) => {
       </Box>
 
       <Box>
-        <Table size="small" component={Box}>
+        <Table size="small">
           <TableBody>
             {(() => {
               let fs = [];
@@ -109,7 +109,7 @@ const Stats = ({ charts }: { charts: Chart[] }) => {
                     ? { backgroundImage: col[1] }
                     : { backgroundColor: col[1] };
                 return (
-                  <TableRow>
+                  <TableRow key={f}>
                     <TableCell style={colStyle}>{f == 10 ? "EX" : f}</TableCell>
                     <TableCell>{flareStats[f] || 0}</TableCell>
                   </TableRow>

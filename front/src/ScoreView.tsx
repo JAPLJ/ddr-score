@@ -40,6 +40,8 @@ import { USER } from "./User.tsx";
 const BESTS_URL = `data/bests.tsv.gz`;
 const SCORES_URL = `data/scores.tsv.gz`;
 
+type FilterKey = { kind: "level"; level: number } | { kind: "recent" };
+
 type SortKey = "song" | "score" | "kind" | "flare";
 type SortOrder = "asc" | "desc";
 
@@ -60,7 +62,10 @@ function* range(start: number, end: number) {
 const ScoreView = () => {
   const [error, setError] = useState<string | null>(null);
   const [charts, setCharts] = useState<Chart[]>([]);
-  const [selectedLevel, setSelectedLevel] = useState<number>(15);
+  const [filterKey, setFilterKey] = useState<FilterKey>({
+    kind: "level",
+    level: 15,
+  });
   const [sortKey, setSortKey] = useState<SortKey>("song");
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
   const [selectedChart, setSelectedChart] = useState<Chart | null>(null);
@@ -78,7 +83,19 @@ const ScoreView = () => {
     fetchData();
   }, []);
 
-  const filteredCharts = [...charts].filter((c) => c.level == selectedLevel);
+  const mostRecentUpdateAt = Math.max(
+    ...[...charts]
+      .map((c) => c.scores.at(-1)?.updateAt?.valueOf())
+      .filter((d) => d != null)
+  );
+
+  const filteredCharts = [...charts].filter((c) => {
+    if (filterKey.kind === "level") {
+      return c.level === filterKey.level;
+    } else {
+      return c.scores.at(-1)?.updateAt?.valueOf() === mostRecentUpdateAt;
+    }
+  });
 
   const sortedCharts = [...filteredCharts].sort((a, b) => {
     let cmp = 0;
@@ -105,10 +122,12 @@ const ScoreView = () => {
     return sortOrder == "asc" ? cmp : -cmp;
   });
 
-  const handleSelectedLevel = (lev: string | null) => {
+  const handleFilter = (lev: string | null) => {
     const level = Number(lev);
     if (level > 0) {
-      setSelectedLevel(level);
+      setFilterKey({ kind: "level", level: level });
+    } else {
+      setFilterKey({ kind: "recent" });
     }
   };
 
@@ -134,13 +153,18 @@ const ScoreView = () => {
         <Box flex={1} paddingBottom={2}>
           <ToggleButtonGroup
             size="small"
-            value={selectedLevel}
+            value={filterKey.kind == "level" ? filterKey.level : "RECENT"}
             exclusive
-            onChange={(_, a) => handleSelectedLevel(a)}
+            onChange={(_, a) => handleFilter(a)}
           >
             {[...range(1, 20)].map((lev) => (
-              <ToggleButton value={lev}>{lev}</ToggleButton>
+              <ToggleButton key={lev} value={lev}>
+                {lev}
+              </ToggleButton>
             ))}
+            <ToggleButton key="RECENT" value="RECENT">
+              RECENT
+            </ToggleButton>
           </ToggleButtonGroup>
         </Box>
 
