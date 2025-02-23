@@ -113,7 +113,7 @@ export const clearKindColors: Record<ClearKind, string[]> = {
   ],
   PFC: [
     "background-image",
-    "linear-gradient(90deg, rgba(255, 200, 96, 0.7), rgba(255, 233, 133, 0.7) 20%, rgba(255, 247, 221, 0.7) 85%, rgba(255, 250, 235, 0.7));",
+    "linear-gradient(90deg, rgba(255, 200, 96, 0.7), rgba(255, 233, 133, 0.7) 20%, rgba(255, 247, 221, 0.7) 85%, rgba(255, 250, 235, 0.7))",
   ],
   GFC: [
     "background-image",

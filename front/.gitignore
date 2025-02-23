@@ -12,7 +12,7 @@ dist
 dist-ssr
 *.local
 
-public/scores/*
+public/data/*
 
 # Editor directories and files
 .vscode/*

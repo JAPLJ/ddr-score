@@ -34,6 +34,7 @@ import {
   fetchCharts,
   flareColors,
 } from "./Data.tsx";
+import Stats from "./Stats.tsx";
 import { USER } from "./User.tsx";
 
 const BESTS_URL = `data/bests.tsv.gz`;
@@ -143,107 +144,118 @@ const ScoreView = () => {
           </ToggleButtonGroup>
         </Box>
 
-        <Table size="small" style={{ width: "auto" }}>
-          <TableHead>
-            <TableRow>
-              <TableCell>
-                <TableSortLabel
-                  active={sortKey === "song"}
-                  direction={sortKey === "song" ? sortOrder : "asc"}
-                  onClick={() => handleSort("song")}
-                >
-                  Song
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>Diff</TableCell>
-              <TableCell>Level</TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={sortKey === "score"}
-                  direction={sortKey === "score" ? sortOrder : "asc"}
-                  onClick={() => handleSort("score")}
-                >
-                  Score
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>Rank</TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={sortKey === "kind"}
-                  direction={sortKey === "kind" ? sortOrder : "asc"}
-                  onClick={() => handleSort("kind")}
-                >
-                  Clear
-                </TableSortLabel>
-              </TableCell>
-              <TableCell>F.Rnk</TableCell>
-              <TableCell>
-                <TableSortLabel
-                  active={sortKey === "flare"}
-                  direction={sortKey === "flare" ? sortOrder : "asc"}
-                  onClick={() => handleSort("flare")}
-                >
-                  F.Skl
-                </TableSortLabel>
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {sortedCharts.map((chart) => {
-              const diffCol = difficultyColors[chart.difficulty];
-              const rankCol = clearRankColors[chart.best.clearRank || "E"];
-              const kindCol =
-                clearKindColors[chart.best.clearKind || "NO PLAY"];
-              const flareCol = flareColors[chart.best.flareRank || 0];
-              const ColoredRow = styled(TableRow)`
-                :not(:hover) .diff {
-                  background-color: ${diffCol};
-                }
-                :not(:hover) .rank {
-                  background-color: ${rankCol};
-                }
-                :not(:hover) .kind {
-                  ${kindCol[0]}: ${kindCol[1]};
-                }
-                :not(:hover) .flare {
-                  ${flareCol[0]}: ${flareCol[1]};
-                }
-              `;
-              return (
-                <ColoredRow
-                  key={chart.id}
-                  hover
-                  onClick={() => {
-                    if (chart.scores.length > 0) {
-                      setSelectedChart(chart);
-                    }
-                  }}
-                >
-                  <TableCell className="diff">{chart.song}</TableCell>
-                  <TableCell className="diff">
-                    {chart.difficulty || "-"}
-                  </TableCell>
-                  <TableCell className="diff">{chart.level || "-"}</TableCell>
-                  <TableCell className="rank">
-                    {chart.best.score || "-"}
-                  </TableCell>
-                  <TableCell className="rank">
-                    {chart.best.clearRank || "-"}
-                  </TableCell>
-                  <TableCell className="kind">
-                    {chart.best.clearKind || "-"}
-                  </TableCell>
-                  <TableCell className="flare">
-                    {chart.best.flareRank || "-"}
-                  </TableCell>
-                  <TableCell className="flare">
-                    {chart.best.flareSkill || "-"}
-                  </TableCell>
-                </ColoredRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+        <Box display="flex" flexDirection="row" columnGap={2}>
+          <Table size="small" style={{ width: "auto" }}>
+            <TableHead>
+              <TableRow>
+                <TableCell>
+                  <TableSortLabel
+                    active={sortKey === "song"}
+                    direction={sortKey === "song" ? sortOrder : "asc"}
+                    onClick={() => handleSort("song")}
+                  >
+                    Song
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>Diff</TableCell>
+                <TableCell>Level</TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={sortKey === "score"}
+                    direction={sortKey === "score" ? sortOrder : "asc"}
+                    onClick={() => handleSort("score")}
+                  >
+                    Score
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>Rank</TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={sortKey === "kind"}
+                    direction={sortKey === "kind" ? sortOrder : "asc"}
+                    onClick={() => handleSort("kind")}
+                  >
+                    Clear
+                  </TableSortLabel>
+                </TableCell>
+                <TableCell>F.Rnk</TableCell>
+                <TableCell>
+                  <TableSortLabel
+                    active={sortKey === "flare"}
+                    direction={sortKey === "flare" ? sortOrder : "asc"}
+                    onClick={() => handleSort("flare")}
+                  >
+                    F.Skl
+                  </TableSortLabel>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {sortedCharts.map((chart) => {
+                const diffCol = difficultyColors[chart.difficulty];
+                const rankCol = clearRankColors[chart.best.clearRank || "E"];
+                const kindCol =
+                  clearKindColors[chart.best.clearKind || "NO PLAY"];
+                const flareCol = flareColors[chart.best.flareRank || 0];
+                const ColoredRow = styled(TableRow)`
+                  :not(:hover) .diff {
+                    background-color: ${diffCol};
+                  }
+                  :not(:hover) .rank {
+                    background-color: ${rankCol};
+                  }
+                  :not(:hover) .kind {
+                    ${kindCol[0]}: ${kindCol[1]};
+                  }
+                  :not(:hover) .flare {
+                    ${flareCol[0]}: ${flareCol[1]};
+                  }
+                `;
+                return (
+                  <ColoredRow
+                    key={chart.id}
+                    hover
+                    onClick={() => {
+                      if (chart.scores.length > 0) {
+                        setSelectedChart(chart);
+                      }
+                    }}
+                  >
+                    <TableCell className="diff">{chart.song}</TableCell>
+                    <TableCell className="diff">
+                      {chart.difficulty || "-"}
+                    </TableCell>
+                    <TableCell className="diff">{chart.level || "-"}</TableCell>
+                    <TableCell className="rank">
+                      {chart.best.score || "-"}
+                    </TableCell>
+                    <TableCell className="rank">
+                      {chart.best.clearRank || "-"}
+                    </TableCell>
+                    <TableCell className="kind">
+                      {chart.best.clearKind || "-"}
+                    </TableCell>
+                    <TableCell className="flare">
+                      {(chart.best.flareRank == 10
+                        ? "EX"
+                        : chart.best.flareRank) || "-"}
+                    </TableCell>
+                    <TableCell className="flare">
+                      {chart.best.flareSkill || "-"}
+                    </TableCell>
+                  </ColoredRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+
+          <Box>
+            <Typography component="h6" gutterBottom>
+              Stats
+            </Typography>
+            <Stats charts={filteredCharts} />
+          </Box>
+        </Box>
       </Box>
 
       <Drawer
