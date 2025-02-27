@@ -91,3 +91,18 @@ npx tsc
 cd ..
 aws s3 cp scraper/dist/index.js s3://ddr-score-data-public/scraper/index.js
 '''
+
+#
+# Operations
+#
+[tasks.add-user]
+script = '''
+URL=$(jq -r .api_private_function_url.value terraform/output.json)
+awscurl \
+    --service lambda \
+    --region ap-northeast-1 \
+    --profile ${AWS_PROFILE} \
+    -X POST \
+    -H "Content-Type: application/json" \
+    ${URL}api/private/add_user -d @${1}
+'''

@@ -27,3 +27,8 @@ output "api_private_function_image_uri" {
   description = "API(Private) Lambda function image uri"
   value       = aws_lambda_function.api_private.image_uri
 }
+
+output "api_private_function_url" {
+  description = "API(Private) Lambda function URL"
+  value       = aws_lambda_function_url.api_private.function_url
+}
