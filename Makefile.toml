@@ -80,3 +80,14 @@ cd ..
 aws s3 sync front/dist/assets/ s3://ddr-score-data-public/scores/${1}/assets/ --delete
 aws s3 cp front/dist/index.html s3://ddr-score-data-public/scores/${1}/
 '''
+
+#
+# Scraper
+#
+[tasks.deploy-scraper]
+script = '''
+cd scraper
+npx tsc
+cd ..
+aws s3 cp scraper/dist/index.js s3://ddr-score-data-public/scraper/index.js
+'''

@@ -316,7 +316,7 @@ async function updateScores(user: string, pass: string) {
   log.append(`Successfully updated. Changes may take some time to appear.`);
 
   const lp = log.append();
-  const url = `${BASE_URL}/scores/${user}/`;
+  const url = `${BASE_URL}scores/${user}/`;
   const link: HTMLAnchorElement = document.createElement("a");
   link.textContent = url;
   link.href = url;

@@ -10,6 +10,18 @@ resource "aws_cloudfront_response_headers_policy" "cors_policy" {
   }
 }
 
+resource "aws_cloudfront_response_headers_policy" "s3_policy" {
+  name = "S3-no-cache"
+
+  custom_headers_config {
+    items {
+      header   = "Cache-Control"
+      override = true
+      value    = "no-cache"
+    }
+  }
+}
+
 data "aws_cloudfront_cache_policy" "asset" {
   name = "Managed-Elemental-MediaPackage"
 }
@@ -73,7 +85,8 @@ resource "aws_cloudfront_distribution" "api" {
     allowed_methods        = ["GET", "HEAD"]
     cached_methods         = ["GET", "HEAD"]
 
-    cache_policy_id = aws_cloudfront_cache_policy.s3_cache.id
+    cache_policy_id            = aws_cloudfront_cache_policy.s3_cache.id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.s3_policy.id
   }
 
   ordered_cache_behavior {
