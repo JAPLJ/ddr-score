@@ -238,12 +238,15 @@ async fn update_score(
     // 自己ベスト登録・更新
     let mut new_bests_ids = vec![];
     for i in (0..new_records.len()).step_by(BIND_LIMIT / 3) {
+        let nr_slice = &new_records[i..(i + BIND_LIMIT / 3).min(new_records.len())];
+        if nr_slice.iter().all(|nr| nr.best_id.is_some()) {
+            continue;
+        }
+
         let mut qb: QueryBuilder<Sqlite> =
             QueryBuilder::new("insert into best (user, chart, score) ");
         qb.push_values(
-            new_records[i..(i + BIND_LIMIT / 3).min(new_records.len())]
-                .iter()
-                .filter(|nr| nr.best_id.is_none()),
+            nr_slice.iter().filter(|nr| nr.best_id.is_none()),
             |mut b, r| {
                 b.push_bind(user_id)
                     .push_bind(r.chart_id)
@@ -464,6 +467,10 @@ async fn dump_user_data(
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+        .init();
+
     let db_url = std::env::var("DATABASE_URL").unwrap_or("sqlite:./.db/ddr_score.db".to_string());
 
     let pool = SqlitePoolOptions::new()
