@@ -2,7 +2,11 @@ use std::{collections::HashMap, time::Duration};
 
 use anyhow::Result;
 use app::ApiResult;
-use axum::{extract::State, routing::post, Json, Router};
+use axum::{
+    extract::State,
+    routing::{get, post},
+    Json, Router,
+};
 use serde::{Deserialize, Serialize};
 use sqlx::{sqlite::SqlitePoolOptions, SqlitePool};
 
@@ -119,6 +123,10 @@ async fn add_songs(
     Ok(Json(res))
 }
 
+async fn health() -> ApiResult<()> {
+    Ok(())
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
     let db_url = std::env::var("DATABASE_URL").unwrap_or("sqlite:./.db/ddr_score.db".to_string());
@@ -131,6 +139,7 @@ async fn main() -> Result<()> {
         .await?;
 
     let app = Router::new()
+        .route("/api/private/health", get(health))
         .route("/api/private/add_user", post(add_user))
         .route("/api/private/add_songs", post(add_songs))
         .with_state(pool);

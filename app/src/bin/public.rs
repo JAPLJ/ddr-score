@@ -5,7 +5,12 @@ use std::{
 
 use anyhow::{anyhow, Result};
 use app::{ApiResult, ClearKind, ClearRank, Difficulty};
-use axum::{extract::State, http::Method, routing::post, Json, Router};
+use axum::{
+    extract::State,
+    http::Method,
+    routing::{get, post},
+    Json, Router,
+};
 use chrono::Utc;
 use flate2::{write::GzEncoder, Compression};
 use serde::{Deserialize, Serialize};
@@ -465,6 +470,10 @@ async fn dump_user_data(
     Ok(())
 }
 
+async fn health() -> ApiResult<()> {
+    Ok(())
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
     tracing_subscriber::fmt()
@@ -485,6 +494,7 @@ async fn main() -> Result<()> {
         .allow_origin(cors::Any);
 
     let app = Router::new()
+        .route("/api/health", get(health))
         .route("/api/update_score", post(update_score))
         .route("/api/dump_user_data", post(dump_user_data))
         .layer(cors)

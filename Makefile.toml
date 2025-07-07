@@ -106,3 +106,18 @@ awscurl \
     -H "Content-Type: application/json" \
     ${URL}api/private/add_user -d @${1}
 '''
+
+[tasks.healthcheck-public]
+script = '''
+curl -I https://ddr.ongakusei.tokyo/api/health
+'''
+
+[tasks.healthcheck-private]
+script = '''
+URL=$(jq -r .api_private_function_url.value terraform/output.json)
+awscurl \
+    --service lambda \
+    --region ap-northeast-1 \
+    --profile ${AWS_PROFILE} \
+    ${URL}api/private/health
+'''
