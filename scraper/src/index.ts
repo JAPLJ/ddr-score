@@ -113,13 +113,33 @@ function flarerankFromImg(url: string): number {
   return 0;
 }
 
+const COVER_SONGS: Record<string, string> = {
+  "8QoODoOldQ9Dodlb9I86liOb0lP010ql": "ReGLOSS",
+  "8IQIld8DI9OPD00dqio1lDQ1bq6Q6P6D": "ReGLOSS",
+  II1199iiDiido80Iq0Q199I1olq0l8i9: "ReGLOSS",
+  OlQbP19IPDDDqDDO1bd0DII8IoqDo1QP: "ReGLOSS",
+};
+
 function scrapeMusicData(tr: HTMLTableRowElement): Score[] {
+  let song_id = tr
+    .querySelector("td a.music_info")
+    ?.getAttribute("href")
+    ?.match(/index=([0-9A-Za-z]+)/)
+    ?.at(1);
+  if (song_id == null) {
+    return [];
+  }
+
   // "DDR System Songs+Replicant Mix "
   // "Something Just Like This (Alesso Remix) "
   // "THIS IS MY LAST RESORT "
   let title = tr.querySelector("td a.music_info")?.textContent?.trimEnd();
   if (title == null) {
     return [];
+  }
+
+  if (song_id in COVER_SONGS) {
+    title = title + "(" + COVER_SONGS[song_id] + ")";
   }
 
   let res: Score[] = [];
